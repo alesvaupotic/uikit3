@@ -43,8 +43,9 @@ class UIKit3Preset extends Preset
      */
     protected static function updatePackageArray(array $packages)
     {
-        return ['uikit' => '^3.0.0-beta.30', 'jquery' => '^3.2.1' ] + Arr::except($packages, [
-            'bootstrap-sass'
+        return ['uikit' => '^3.0.0-beta.42'] + Arr::except($packages, [
+            'bootstrap',
+            'popper.js'
         ]);
     }
 
@@ -66,18 +67,20 @@ class UIKit3Preset extends Preset
      */
     protected static function updateBootstrapping()
     {
-        copy(__DIR__.'/stubs/app.scss', resource_path('assets/sass/app.scss'));
+        copy(__DIR__.'/stubs/app.scss', resource_path('sass/app.scss'));
 
         tap(new Filesystem, function ($filesystem) {
             $filesystem->delete(resource_path('assets/sass/_variables.scss'));
 
             $bootstrapJs = str_replace(
-                "require('bootstrap-sass');",
+                "require('bootstrap');",
                 "window.UIkit = require('uikit');",
-                $filesystem->get(resource_path('assets/js/bootstrap.js'))
+                $filesystem->get(resource_path('js/bootstrap.js'))
             );
 
-            $filesystem->put(resource_path('assets/js/bootstrap.js'), $bootstrapJs);
+            $bootstrapJs = str_replace("window.Popper = require('popper.js').default;", '', $bootstrapJs);
+
+            $filesystem->put(resource_path('js/bootstrap.js'), $bootstrapJs);
         });
     }
 
